@@ -9,6 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.galasia.transactionledger.model.Transaction;
+import com.galasia.transactionledger.repository.TransactionRepository;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,6 +23,9 @@ class TransactionControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Test
     @DisplayName("PUT /transactions/{id} should create a transaction and return status ok")
@@ -167,9 +173,25 @@ class TransactionControllerIntegrationTest {
 
     @Test
     @DisplayName("GET /transactions/types/{type} should return empty list when no transactions of that type exist")
-    void findIdsByTypeReturnsEmptyListWhenNoTransactionsOfThatType() throws Exception {
+    void findIdsByType_returnsEmptyList_whenNoTransactionsOfThatType() throws Exception {
         mockMvc.perform(get("/transactions/types/nonexistent_type"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("GET /transactions/sum/{id} should not infinite loop if a cyclic reference exists in the data")
+    void sumSubtree_doesNotInfiniteLoop_onCyclicParentReferences() throws Exception {
+        // Since the API prevents creating cycles (parent must exist and transactions are immutable),
+        // we must inject the corrupted data directly into the repository to test the recursion safety.
+        Transaction tx1 = new Transaction(100L, 10.0, "cycle", 101L);
+        Transaction tx2 = new Transaction(101L, 20.0, "cycle", 100L);
+        transactionRepository.save(tx1);
+        transactionRepository.save(tx2);
+
+        // It should return a valid sum (10.0 + 20.0 = 30.0) breaking the cycle and NOT StackOverflow.
+        mockMvc.perform(get("/transactions/sum/100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum").value(30.0));
     }
 }
