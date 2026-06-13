@@ -35,21 +35,26 @@ public class TransactionService {
     }
 
     public double getTransitiveSum(Long transactionId) {
-        return getTransitiveSum(transactionId, new HashSet<>());
-    }
-
-    private double getTransitiveSum(Long transactionId, Set<Long> visited) {
-        if (!visited.add(transactionId)) {
-            return 0.0;
-        }
-
-        Transaction transaction = repository.findById(transactionId)
+        repository.findById(transactionId)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction not found: " + transactionId));
 
-        double sum = transaction.getAmount();
-        for (Long childId : repository.getChildrenIds(transactionId)) {
-            sum += getTransitiveSum(childId, visited);
+        double totalSum = 0.0;
+        Set<Long> visited = new HashSet<>();
+        java.util.Queue<Long> queue = new java.util.LinkedList<>();
+        
+        queue.add(transactionId);
+
+        while (!queue.isEmpty()) {
+            Long currentId = queue.poll();
+            
+            if (visited.add(currentId)) {
+                java.util.Optional<Transaction> txOpt = repository.findById(currentId);
+                if (txOpt.isPresent()) {
+                    totalSum += txOpt.get().getAmount();
+                    queue.addAll(repository.getChildrenIds(currentId));
+                }
+            }
         }
-        return sum;
+        return totalSum;
     }
 }
