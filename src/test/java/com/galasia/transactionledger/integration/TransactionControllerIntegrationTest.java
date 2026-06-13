@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class TransactionControllerIntegrationTest {
 
     @Autowired
@@ -28,5 +31,31 @@ class TransactionControllerIntegrationTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ok"));
+    }
+
+    @Test
+    @DisplayName("GET /transactions/types/{type} should return transaction ids for the given type")
+    void shouldReturnTransactionIdsByType() throws Exception {
+        // Given: two transactions of type "shopping"
+        mockMvc.perform(put("/transactions/11")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 10000, "type": "shopping"}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/transactions/12")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 5000, "type": "shopping"}
+                                """))
+                .andExpect(status().isOk());
+
+        // When & Then: querying by type returns both ids
+        mockMvc.perform(get("/transactions/types/shopping"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0]").value(11))
+                .andExpect(jsonPath("$[1]").value(12));
     }
 }
