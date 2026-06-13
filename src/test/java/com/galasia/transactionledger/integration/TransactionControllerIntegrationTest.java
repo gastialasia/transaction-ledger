@@ -60,6 +60,24 @@ class TransactionControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("GET /transactions/types/{type} should return a single transaction id when only one exists for the given type")
+    void findIdsByTypeReturnsIdWhenOneTransactionOfThatType() throws Exception {
+        // Given: one transaction of type "groceries"
+        mockMvc.perform(put("/transactions/30")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 2500, "type": "groceries"}
+                                """))
+                .andExpect(status().isOk());
+
+        // When & Then: querying by type returns exactly one id
+        mockMvc.perform(get("/transactions/types/groceries"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0]").value(30));
+    }
+
+    @Test
     @DisplayName("GET /transactions/sum/{id} should return the transaction amount when it has no children")
     void shouldReturnSumForSingleTransaction() throws Exception {
         // Given: a single transaction
@@ -149,7 +167,7 @@ class TransactionControllerIntegrationTest {
 
     @Test
     @DisplayName("GET /transactions/types/{type} should return empty list when no transactions of that type exist")
-    void findIdsByType_returnsEmptyList_whenNoTransactionsOfThatType() throws Exception {
+    void findIdsByTypeReturnsEmptyListWhenNoTransactionsOfThatType() throws Exception {
         mockMvc.perform(get("/transactions/types/nonexistent_type"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
