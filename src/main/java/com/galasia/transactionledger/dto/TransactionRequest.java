@@ -1,4 +1,6 @@
 package com.galasia.transactionledger.dto;
 
-public record TransactionRequest(double amount, String type, Long parentId) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record TransactionRequest(double amount, String type, @JsonProperty("parent_id") Long parentId) {
 }

@@ -75,4 +75,37 @@ class TransactionControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sum").value(5000.0));
     }
+
+    @Test
+    @DisplayName("GET /transactions/sum/{id} should return transitive sum including children")
+    void shouldReturnTransitiveSumIncludingChildren() throws Exception {
+        mockMvc.perform(put("/transactions/10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 5000, "type": "cars"}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/transactions/11")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 10000, "type": "shopping", "parent_id": 10}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/transactions/12")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 5000, "type": "shopping", "parent_id": 11}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/transactions/sum/10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum").value(20000.0));
+
+        mockMvc.perform(get("/transactions/sum/11"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum").value(15000.0));
+    }
 }

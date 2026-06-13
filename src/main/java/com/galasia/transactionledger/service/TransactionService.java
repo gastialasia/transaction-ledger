@@ -27,6 +27,11 @@ public class TransactionService {
     public double getTransitiveSum(Long transactionId) {
         Transaction transaction = repository.findById(transactionId)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found: " + transactionId));
-        return transaction.getAmount();
+
+        double sum = transaction.getAmount();
+        for (Long childId : repository.getChildrenIds(transactionId)) {
+            sum += getTransitiveSum(childId);
+        }
+        return sum;
     }
 }
