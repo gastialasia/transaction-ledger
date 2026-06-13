@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -27,6 +28,10 @@ public class TransactionRepository {
         return Collections.unmodifiableList(
                 transactionIdsByType.getOrDefault(type, List.of())
         );
+    }
+
+    public Optional<Transaction> findById(Long id) {
+        return Optional.ofNullable(transactions.get(id));
     }
 }
 

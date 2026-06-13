@@ -58,4 +58,21 @@ class TransactionControllerIntegrationTest {
                 .andExpect(jsonPath("$[0]").value(11))
                 .andExpect(jsonPath("$[1]").value(12));
     }
+
+    @Test
+    @DisplayName("GET /transactions/sum/{id} should return the transaction amount when it has no children")
+    void shouldReturnSumForSingleTransaction() throws Exception {
+        // Given: a single transaction
+        mockMvc.perform(put("/transactions/10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 5000, "type": "cars"}
+                                """))
+                .andExpect(status().isOk());
+
+        // When & Then: sum is just its own amount
+        mockMvc.perform(get("/transactions/sum/10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum").value(5000.0));
+    }
 }

@@ -1,6 +1,7 @@
 package com.galasia.transactionledger.controller;
 
 import com.galasia.transactionledger.dto.StatusResponse;
+import com.galasia.transactionledger.dto.SumResponse;
 import com.galasia.transactionledger.dto.TransactionRequest;
 import com.galasia.transactionledger.service.TransactionService;
 import org.springframework.http.ResponseEntity;
@@ -29,5 +30,11 @@ public class TransactionController {
     @GetMapping("/types/{type}")
     public ResponseEntity<List<Long>> getTransactionsByType(@PathVariable String type) {
         return ResponseEntity.ok(transactionService.getTransactionIdsByType(type));
+    }
+
+    @GetMapping("/sum/{transactionId}")
+    public ResponseEntity<SumResponse> getTransitiveSum(@PathVariable Long transactionId) {
+        double sum = transactionService.getTransitiveSum(transactionId);
+        return ResponseEntity.ok(new SumResponse(sum));
     }
 }

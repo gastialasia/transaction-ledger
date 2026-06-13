@@ -23,4 +23,10 @@ public class TransactionService {
     public List<Long> getTransactionIdsByType(String type) {
         return repository.findIdsByType(type);
     }
+
+    public double getTransitiveSum(Long transactionId) {
+        Transaction transaction = repository.findById(transactionId)
+                .orElseThrow(() -> new IllegalArgumentException("Transaction not found: " + transactionId));
+        return transaction.getAmount();
+    }
 }
