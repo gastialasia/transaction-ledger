@@ -1,5 +1,6 @@
 package com.galasia.transactionledger.service;
 
+import com.galasia.transactionledger.exception.TransactionAlreadyExistsException;
 import com.galasia.transactionledger.exception.TransactionNotFoundException;
 import com.galasia.transactionledger.model.Transaction;
 import com.galasia.transactionledger.repository.TransactionRepository;
@@ -17,6 +18,9 @@ public class TransactionService {
     }
 
     public void createTransaction(Long id, double amount, String type, Long parentId) {
+        if (repository.findById(id).isPresent()) {
+            throw new TransactionAlreadyExistsException("Transaction already exists: " + id);
+        }
         if (parentId != null && repository.findById(parentId).isEmpty()) {
             throw new IllegalArgumentException("Parent transaction not found: " + parentId);
         }

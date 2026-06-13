@@ -126,4 +126,24 @@ class TransactionControllerIntegrationTest {
         mockMvc.perform(get("/transactions/sum/999"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("PUT /transactions/{id} should return 409 Conflict when transaction already exists")
+    void shouldReturnConflictWhenTransactionAlreadyExists() throws Exception {
+        // Create it once
+        mockMvc.perform(put("/transactions/20")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 5000, "type": "cars"}
+                                """))
+                .andExpect(status().isOk());
+
+        // Try to create it again with the same ID
+        mockMvc.perform(put("/transactions/20")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 10000, "type": "shopping"}
+                                """))
+                .andExpect(status().isConflict());
+    }
 }
