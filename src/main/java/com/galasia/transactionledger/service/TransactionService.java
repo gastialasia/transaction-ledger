@@ -16,6 +16,9 @@ public class TransactionService {
     }
 
     public void createTransaction(Long id, double amount, String type, Long parentId) {
+        if (parentId != null && repository.findById(parentId).isEmpty()) {
+            throw new IllegalArgumentException("Parent transaction not found: " + parentId);
+        }
         Transaction transaction = new Transaction(id, amount, type, parentId);
         repository.save(transaction);
     }

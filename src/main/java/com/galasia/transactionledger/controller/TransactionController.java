@@ -37,4 +37,9 @@ public class TransactionController {
         double sum = transactionService.getTransitiveSum(transactionId);
         return ResponseEntity.ok(new SumResponse(sum));
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
 }

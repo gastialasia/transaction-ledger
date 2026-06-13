@@ -108,4 +108,15 @@ class TransactionControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sum").value(15000.0));
     }
+
+    @Test
+    @DisplayName("PUT /transactions/{id} should return error when parent_id does not exist")
+    void shouldReturnErrorWhenParentIdDoesNotExist() throws Exception {
+        mockMvc.perform(put("/transactions/11")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 10000, "type": "shopping", "parent_id": 999}
+                                """))
+                .andExpect(status().isBadRequest());
+    }
 }
