@@ -119,4 +119,11 @@ class TransactionControllerIntegrationTest {
                                 """))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("GET /transactions/sum/{id} should return 404 when transaction does not exist")
+    void shouldReturn404WhenTransactionNotFound() throws Exception {
+        mockMvc.perform(get("/transactions/sum/999"))
+                .andExpect(status().isNotFound());
+    }
 }

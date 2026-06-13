@@ -1,5 +1,6 @@
 package com.galasia.transactionledger.service;
 
+import com.galasia.transactionledger.exception.TransactionNotFoundException;
 import com.galasia.transactionledger.model.Transaction;
 import com.galasia.transactionledger.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class TransactionService {
 
     public double getTransitiveSum(Long transactionId) {
         Transaction transaction = repository.findById(transactionId)
-                .orElseThrow(() -> new IllegalArgumentException("Transaction not found: " + transactionId));
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found: " + transactionId));
 
         double sum = transaction.getAmount();
         for (Long childId : repository.getChildrenIds(transactionId)) {
