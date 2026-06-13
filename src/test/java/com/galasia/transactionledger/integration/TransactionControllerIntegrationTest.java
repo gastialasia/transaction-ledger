@@ -194,4 +194,37 @@ class TransactionControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sum").value(30.0));
     }
+
+    @Test
+    @DisplayName("GET /transactions/sum/{id} should correctly sum multiple siblings (children of the same parent)")
+    void sumSubtreeIncludesMultipleSiblings() throws Exception {
+        // Parent: 200 (amount: 100)
+        mockMvc.perform(put("/transactions/200")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 100, "type": "parent"}
+                                """))
+                .andExpect(status().isOk());
+
+        // Child 1: 201 (amount: 50, parent: 200)
+        mockMvc.perform(put("/transactions/201")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 50, "type": "child", "parent_id": 200}
+                                """))
+                .andExpect(status().isOk());
+
+        // Child 2: 202 (amount: 25, parent: 200)
+        mockMvc.perform(put("/transactions/202")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": 25, "type": "child", "parent_id": 200}
+                                """))
+                .andExpect(status().isOk());
+
+        // Sum of 200 should be 100 + 50 + 25 = 175
+        mockMvc.perform(get("/transactions/sum/200"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum").value(175.0));
+    }
 }
