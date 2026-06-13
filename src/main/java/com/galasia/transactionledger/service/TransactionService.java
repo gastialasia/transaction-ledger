@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 import java.util.List;
 import java.util.HashSet;
+import java.util.Queue;
+import java.util.LinkedList;
+
 
 @Service
 public class TransactionService {
@@ -40,7 +43,7 @@ public class TransactionService {
 
         double totalSum = 0.0;
         Set<Long> visited = new HashSet<>();
-        java.util.Queue<Long> queue = new java.util.LinkedList<>();
+        Queue<Long> queue = new LinkedList<>();
         
         queue.add(transactionId);
 
