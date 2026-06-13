@@ -1,0 +1,1 @@
+RESTful service for storing financial transactions with type-based queries and transitive sum calculations over parent-child relationships. Built with Spring Boot, in-memory storage, no SQL.
