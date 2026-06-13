@@ -146,4 +146,12 @@ class TransactionControllerIntegrationTest {
                                 """))
                 .andExpect(status().isConflict());
     }
+
+    @Test
+    @DisplayName("GET /transactions/types/{type} should return empty list when no transactions of that type exist")
+    void findIdsByType_returnsEmptyList_whenNoTransactionsOfThatType() throws Exception {
+        mockMvc.perform(get("/transactions/types/nonexistent_type"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
 }
