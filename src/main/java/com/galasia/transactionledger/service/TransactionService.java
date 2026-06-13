@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.Optional;
 
 
 @Service
@@ -51,7 +52,7 @@ public class TransactionService {
             Long currentId = queue.poll();
             
             if (visited.add(currentId)) {
-                java.util.Optional<Transaction> txOpt = repository.findById(currentId);
+                Optional<Transaction> txOpt = repository.findById(currentId);
                 if (txOpt.isPresent()) {
                     totalSum += txOpt.get().getAmount();
                     queue.addAll(repository.getChildrenIds(currentId));
